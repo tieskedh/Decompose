@@ -23,6 +23,12 @@ fun <C : Parcelable, T : Any> ComponentContext.router(
     handleBackButton: Boolean = false,
     childFactory: (configuration: C, ComponentContext) -> T
 ): Router<C, T> {
+    check(!stateKeeper.isRegistered(key = key)) {
+        "The key \"$key\" is already in use. If there are multiple Routers in one component, " +
+            "make sure you supplied different key for each Router. Also make sure there is only instance " +
+            "of a root component at a time."
+    }
+
     val routerEntryFactory = RouterEntryFactoryImpl(lifecycle = lifecycle, childFactory = childFactory)
 
     return RouterImpl(

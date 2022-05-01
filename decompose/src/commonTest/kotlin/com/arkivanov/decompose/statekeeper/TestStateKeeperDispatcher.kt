@@ -30,14 +30,16 @@ class TestStateKeeperDispatcher(
             ?.consume(clazz)
 
     override fun <T : Parcelable> register(key: String, supplier: () -> T) {
-        check(key !in suppliers)
+        check(!isRegistered(key))
         suppliers[key] = supplier
     }
 
     override fun unregister(key: String) {
-        check(key in suppliers)
+        check(isRegistered(key))
         suppliers -= key
     }
+
+    override fun isRegistered(key: String): Boolean = key in suppliers
 
     fun assertSupplierRegistered(key: String) {
         assertTrue(key in suppliers)
