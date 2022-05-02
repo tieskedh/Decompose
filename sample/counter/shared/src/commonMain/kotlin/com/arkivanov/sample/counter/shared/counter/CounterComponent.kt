@@ -12,19 +12,20 @@ import com.arkivanov.essenty.parcelable.Parcelize
 import com.arkivanov.essenty.statekeeper.consume
 import com.arkivanov.sample.counter.shared.counter.Counter.Model
 import com.badoo.reaktive.disposable.scope.DisposableScope
-import com.badoo.reaktive.maybe.maybeTimer
+import com.badoo.reaktive.observable.observableInterval
 import com.badoo.reaktive.scheduler.mainScheduler
-import com.badoo.reaktive.single.repeatWhen
-import com.badoo.reaktive.single.singleOf
 
 class CounterComponent(
     componentContext: ComponentContext,
-    index: Int
+    private val title: String,
+    private val isBackEnabled: Boolean,
+    private val onNext: () -> Unit,
+    private val onPrev: () -> Unit,
 ) : Counter, ComponentContext by componentContext {
 
     private val handler =
         instanceKeeper.getOrCreate(KEY_STATE) {
-            Handler(stateKeeper.consume(KEY_STATE) ?: State(index = index))
+            Handler(stateKeeper.consume(KEY_STATE) ?: State())
         }
 
     override val model: Value<Model> = handler.state.map { it.toModel() }
@@ -35,8 +36,18 @@ class CounterComponent(
 
     private fun State.toModel(): Model =
         Model(
-            text = "Counter${index}: ${count.toString().padStart(length = 3, padChar = '0')}"
+            title = title,
+            text = count.toString().padStart(length = 3, padChar = '0'),
+            isBackEnabled = isBackEnabled,
         )
+
+    override fun onNextClicked() {
+        onNext()
+    }
+
+    override fun onPrevClicked() {
+        onPrev()
+    }
 
     private companion object {
         private const val KEY_STATE = "STATE"
@@ -44,16 +55,14 @@ class CounterComponent(
 
     @Parcelize
     private data class State(
-        val index: Int,
-        val count: Int = 0
+        val count: Int = 0,
     ) : Parcelable
 
     private class Handler(initialState: State) : InstanceKeeper.Instance, DisposableScope by DisposableScope() {
-        val state = MutableValue(initialState)
+        val state: MutableValue<State> = MutableValue(initialState)
 
         init {
-            singleOf(Unit)
-                .repeatWhen { _, _ -> maybeTimer(250L, mainScheduler) }
+            observableInterval(periodMillis = 250L, scheduler = mainScheduler)
                 .subscribeScoped(isThreadLocal = true) {
                     state.reduce { it.copy(count = it.count + 1) }
                 }

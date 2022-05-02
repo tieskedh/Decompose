@@ -1,79 +1,105 @@
 package com.arkivanov.sample.counter.shared.root
 
 import com.arkivanov.sample.counter.shared.RProps
-import com.arkivanov.sample.counter.shared.counter.CounterR
-import com.arkivanov.sample.counter.shared.inner.InnerR
+import com.arkivanov.sample.counter.shared.tab.TabR
 import com.arkivanov.sample.counter.shared.uniqueKey
 import com.arkivanov.sample.counter.shared.useAsState
-import csstype.AlignItems
 import csstype.BoxSizing
-import csstype.JustifyContent
+import csstype.Display
+import csstype.FlexDirection
+import csstype.number
 import csstype.pct
 import csstype.px
-import mui.material.Button
-import mui.material.ButtonColor
-import mui.material.ButtonVariant
+import mui.material.BottomNavigation
+import mui.material.BottomNavigationAction
+import mui.material.Box
+import mui.material.Icon
 import mui.material.Paper
 import mui.material.PaperVariant
-import mui.material.Stack
-import mui.material.StackDirection
-import mui.system.ResponsiveStyleValue
 import mui.system.sx
 import react.FC
+import react.ReactNode
+import react.create
 import react.key
 
-var RootR: FC<RProps<CounterRoot>> = FC { props ->
+var RootR: FC<RProps<Root>> = FC { props ->
     val routerState by props.component.routerState.useAsState()
 
     Paper {
         variant = PaperVariant.outlined
 
-        Stack {
-            direction = ResponsiveStyleValue(StackDirection.column)
-            spacing = ResponsiveStyleValue(2)
+        sx {
+            display = Display.inlineBlock
+        }
 
+        Box {
             sx {
-                alignItems = AlignItems.center
-                justifyContent = JustifyContent.center
-                boxSizing = BoxSizing.borderBox
-                width = 100.pct
-                padding = 16.px
+                display = Display.flex
+                flexDirection = FlexDirection.column
             }
 
-            CounterR {
-                component = props.component.counter
-                key = component.uniqueKey()
-
+            Box {
                 sx {
+                    padding = 16.px
                     width = 100.pct
+                    boxSizing = BoxSizing.borderBox
+                }
+
+                TabR {
+                    component = routerState.activeChild.instance.tab
+                    key = component.uniqueKey()
+
+                    sx {
+                        display = Display.inlineBlock
+                        flexGrow = number(1.0)
+                        flexShrink = number(0.0)
+                    }
                 }
             }
 
-            Button {
-                variant = ButtonVariant.contained
-                color = ButtonColor.primary
-                onClick = { props.component.onNextChild() }
-
-                +"Next child"
-            }
-
-            Button {
-                variant = ButtonVariant.contained
-                color = ButtonColor.primary
-                disabled = !routerState.activeChild.instance.isBackEnabled
-                onClick = { props.component.onPrevChild() }
-
-                +"Prev child"
-            }
-
-            InnerR {
-                component = routerState.activeChild.instance.inner
-                key = component.uniqueKey()
-
+            BottomNavigation {
                 sx {
-                    width = 100.pct
+                    flexGrow = number(0.0)
+                }
+
+                showLabels = true
+
+                value = when (routerState.activeChild.instance) {
+                    is Root.Child.TabA -> TabItem.A
+                    is Root.Child.TabB -> TabItem.B
+                    is Root.Child.TabC -> TabItem.C
+                }
+
+                onChange = { _, newValue ->
+                    when (newValue.unsafeCast<TabItem>()) {
+                        TabItem.A -> props.component.onTabAClicked()
+                        TabItem.B -> props.component.onTabBClicked()
+                        TabItem.C -> props.component.onTabCClicked()
+                    }
+                }
+
+                BottomNavigationAction {
+                    value = TabItem.A
+                    label = ReactNode("TabA")
+                    icon = Icon.create { +"looks_one" }
+                }
+
+                BottomNavigationAction {
+                    value = TabItem.B
+                    label = ReactNode("TabB")
+                    icon = Icon.create { +"looks_two" }
+                }
+
+                BottomNavigationAction {
+                    value = TabItem.C
+                    label = ReactNode("TabC")
+                    icon = Icon.create { +"looks_3" }
                 }
             }
         }
     }
+}
+
+private enum class TabItem {
+    A, B, C
 }

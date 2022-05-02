@@ -6,7 +6,13 @@ interface Counter {
 
     val model: Value<Model>
 
-    class Model(
-        val text: String
+    fun onNextClicked()
+
+    fun onPrevClicked()
+
+    data class Model(
+        val title: String,
+        val text: String,
+        val isBackEnabled: Boolean,
     )
 }

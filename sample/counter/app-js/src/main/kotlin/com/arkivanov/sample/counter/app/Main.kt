@@ -5,7 +5,7 @@ import com.arkivanov.decompose.router.webhistory.DefaultWebHistoryController
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
 import com.arkivanov.essenty.lifecycle.stop
-import com.arkivanov.sample.counter.shared.root.CounterRootComponent
+import com.arkivanov.sample.counter.shared.root.RootComponent
 import com.arkivanov.sample.counter.shared.root.RootR
 import kotlinx.browser.document
 import kotlinx.browser.window
@@ -19,9 +19,9 @@ fun main() {
     val lifecycle = LifecycleRegistry()
 
     val root =
-        CounterRootComponent(
+        RootComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
-            deepLink = CounterRootComponent.DeepLink.Web(path = window.location.pathname),
+            deepLink = RootComponent.DeepLink.Web(path = window.location.pathname),
             webHistoryController = DefaultWebHistoryController(),
         )
 
@@ -29,7 +29,7 @@ fun main() {
 
     createRoot(document.getElementById("app")!!).render(
         Container.create {
-            maxWidth = Breakpoint.xs
+            maxWidth = Breakpoint.sm
 
             RootR {
                 component = root

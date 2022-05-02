@@ -14,20 +14,18 @@ public class ObservableValue<T : AnyObject> : ObservableObject {
     
     @Published
     var value: T
-    
+
     private var observer: ((T) -> Void)?
     
     init(_ value: Value<T>) {
-        self.observableValue = value
+        observableValue = value
         self.value = observableValue.value
-        
-        self.observer = { value in
-            self.value = value
-        }
+        observer = { [weak self] value in self?.value = value }
         observableValue.subscribe(observer: observer!)
     }
     
     deinit {
-        self.observableValue.unsubscribe(observer: self.observer!)
+        NSLog("Uns")
+        observableValue.unsubscribe(observer: self.observer!)
     }
 }

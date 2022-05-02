@@ -10,52 +10,64 @@ import SwiftUI
 import Counter
 
 struct CounterRootView: View {
-    private let counterRoot: CounterRoot
+    private let root: Root
     
     @ObservedObject
-    private var routerState: ObservableValue<RouterState<AnyObject, CounterRootChild>>
+    private var routerState: ObservableValue<RouterState<AnyObject, RootChild>>
     
-    init(_ counterRoot: CounterRoot) {
-        self.counterRoot = counterRoot
-        self.routerState = ObservableValue(counterRoot.routerState)
+    private var activeChild: RootChild { routerState.value.activeChild.instance }
+    
+    init(_ root: Root) {
+        self.root = root
+        routerState = ObservableValue(root.routerState)
     }
     
-    
     var body: some View {
-        let activeChild = self.routerState.value.activeChild.instance
-        
-        return VStack(spacing: 8) {
-            CounterView(self.counterRoot.counter)
+        VStack(spacing: 16) {
+            CounterTabView(activeChild.tab)
             
-            Button(action: self.counterRoot.onNextChild, label: { Text("Next Child") })
-            
-            Button(action: self.counterRoot.onPrevChild, label: { Text("Prev Child") })
-                .disabled(!activeChild.isBackEnabled)
-            
-            CounterInnerView(activeChild.inner)
+            HStack(spacing: 16) {
+                Button(action: root.onTabAClicked) {
+                    Label("TabA", systemImage: "a.square.fill")
+                        .labelStyle(VerticalLabelStyle())
+                        .opacity(activeChild is RootChild.TabA ? 1 : 0.5)
+                }
+                
+                Button(action: root.onTabBClicked) {
+                    Label("TabB", systemImage: "b.square.fill")
+                        .labelStyle(VerticalLabelStyle())
+                        .opacity(activeChild is RootChild.TabB ? 1 : 0.5)
+                }
+                
+                Button(action: root.onTabCClicked) {
+                    Label("TabC", systemImage: "c.square.fill")
+                        .labelStyle(VerticalLabelStyle())
+                        .opacity(activeChild is RootChild.TabC ? 1 : 0.5)
+                }
+            }
+        }
+    }
+}
+
+private struct VerticalLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .center, spacing: 8) {
+            configuration.icon
+            configuration.title
         }
     }
 }
 
 struct CounterRootView_Previews: PreviewProvider {
     static var previews: some View {
-        CounterRootView(CoutnerRootPreview())
+        CounterRootView(RootPreview())
     }
+}
+
+class RootPreview : Root {
+    let routerState: Value<RouterState<AnyObject, RootChild>> = simpleRouterState(RootChild.TabA(tab: TabPreview()))
     
-    class CoutnerRootPreview : CounterRoot {
-        let counter: Counter = CounterView_Previews.CounterPreview()
-        
-        let routerState: Value<RouterState<AnyObject, CounterRootChild>> = simpleRouterState(
-            CounterRootChild(
-                inner: CounterInnerView_Previews.CounterInnerPreview(),
-                isBackEnabled: true
-            )
-        )
-        
-        func onNextChild() {
-        }
-        
-        func onPrevChild() {
-        }
-    }
+    func onTabAClicked() {}
+    func onTabBClicked() {}
+    func onTabCClicked() {}
 }
