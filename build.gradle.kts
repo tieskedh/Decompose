@@ -38,9 +38,10 @@ setupAllProjects {
         val nonAndroid by named(common)
         val native by named(common)
         val nonNative by named(common)
+        val java by named(nonNative)
 
-        android.dependsOn(nonNative)
-        jvm.dependsOn(nonAndroid, nonNative)
+        android.dependsOn(java)
+        jvm.dependsOn(nonAndroid, java)
         js.dependsOn(nonAndroid, nonNative)
         darwinSet.dependsOn(nonAndroid, native)
     }
