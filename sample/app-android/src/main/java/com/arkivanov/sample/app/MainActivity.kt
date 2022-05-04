@@ -4,15 +4,14 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.defaultComponentContext
 import com.arkivanov.sample.app.ui.ComposeAppTheme
-import com.arkivanov.sample.shared.counters.Counters
-import com.arkivanov.sample.shared.counters.CountersComponent
-import com.arkivanov.sample.shared.counters.CountersContent
+import com.arkivanov.sample.shared.root.Root
+import com.arkivanov.sample.shared.root.RootComponent
+import com.arkivanov.sample.shared.root.RootContent
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,8 +20,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        val root = RootComponent(defaultComponentContext())
-        val root = CountersComponent(defaultComponentContext())
+        val root = RootComponent(defaultComponentContext())
 
         when (mode) {
             Mode.COMPOSE -> drawViaCompose(root)
@@ -30,11 +28,11 @@ class MainActivity : AppCompatActivity() {
         }.let {}
     }
 
-    private fun drawViaCompose(root: Counters) {
+    private fun drawViaCompose(root: Root) {
         setContent {
             ComposeAppTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    CountersContent(counters = root, modifier = Modifier.fillMaxSize())
+                    RootContent(root = root, modifier = Modifier.fillMaxSize())
                 }
             }
         }
